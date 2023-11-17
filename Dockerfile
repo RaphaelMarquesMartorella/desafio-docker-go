@@ -1,19 +1,13 @@
-FROM golang:latest AS builder
+FROM golang:1.17-alpine AS build
 
 WORKDIR /usr/src/app
+COPY . .
 
-COPY go.mod .
-COPY main.go .
+RUN go build -o main .
 
-RUN go mod download
-RUN go build -o /usr/src/app/main .
+FROM scratch
 
-# Final stage
-FROM alpine:latest
-
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-
-COPY --from=builder /usr/src/app/main .
+WORKDIR /app
+COPY --from=build /usr/src/app/main .
 
 CMD ["./main"]
